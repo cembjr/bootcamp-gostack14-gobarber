@@ -3,10 +3,15 @@ import { SignInPage } from './pages/SignIn';
 import { SignUpPage } from './pages/SignUp';
 import GlobalStyle from './styles/global';
 
+import { AppProvider } from './hooks';
+
 const App: React.FC = () => {
   return (
     <>
-      <SignInPage />
+      <AppProvider>
+        <SignInPage />
+      </AppProvider>
+
       <GlobalStyle />
     </>
   );
