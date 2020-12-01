@@ -5,26 +5,33 @@ import FakeUsersRepository from '../repositories/fakes/FakeUsersRepository';
 import AuthenticateUserService from './AutenticateUserService';
 import CreateUserService from './CreateUserService';
 
+let fakeUserRepository: FakeUsersRepository;
+let fakeHashProvider: FakeHashProvider;
+let createUserServ: CreateUserService;
+let authenticateUserServ: AuthenticateUserService;
 describe('AuthenticateUser', () => {
-  it('should be able to authenticate', async () => {
-    const fakeUserRepository = new FakeUsersRepository();
-    const fakeHashProvider = new FakeHashProvider();
+  beforeEach(() => {
+    fakeUserRepository = new FakeUsersRepository();
 
-    const createUserServ = new CreateUserService(
+    fakeHashProvider = new FakeHashProvider();
+
+    createUserServ = new CreateUserService(
       fakeUserRepository,
       fakeHashProvider,
     );
 
+    authenticateUserServ = new AuthenticateUserService(
+      fakeUserRepository,
+      fakeHashProvider,
+    );
+  });
+
+  it('should be able to authenticate', async () => {
     const user = await createUserServ.execute({
       name: 'Jhon Doe',
       email: 'c@c.com.br',
       password: '123456',
     });
-
-    const authenticateUserServ = new AuthenticateUserService(
-      fakeUserRepository,
-      fakeHashProvider,
-    );
 
     const response = await authenticateUserServ.execute({
       email: 'c@c.com.br',
@@ -36,15 +43,7 @@ describe('AuthenticateUser', () => {
   });
 
   it('should not be able to authenticate with non existing user', async () => {
-    const fakeUserRepository = new FakeUsersRepository();
-    const fakeHashProvider = new FakeHashProvider();
-
-    const authenticateUserServ = new AuthenticateUserService(
-      fakeUserRepository,
-      fakeHashProvider,
-    );
-
-    expect(
+    await expect(
       authenticateUserServ.execute({
         email: 'c@c.com.br',
         password: '123456',
@@ -53,25 +52,13 @@ describe('AuthenticateUser', () => {
   });
 
   it('should not be able to authenticate with wrong password', async () => {
-    const fakeUserRepository = new FakeUsersRepository();
-    const fakeHashProvider = new FakeHashProvider();
-
-    const createUserServ = new CreateUserService(
-      fakeUserRepository,
-      fakeHashProvider,
-    );
     await createUserServ.execute({
       name: 'Jhon Doe',
       email: 'c@c.com.br',
       password: '123456',
     });
 
-    const authenticateUserServ = new AuthenticateUserService(
-      fakeUserRepository,
-      fakeHashProvider,
-    );
-
-    expect(
+    await expect(
       authenticateUserServ.execute({
         email: 'c@c.com.br',
         password: 'wrong-password',
